@@ -5,7 +5,9 @@ export default function page() {
     <div>
       <h1>Summarise</h1>
       <p>Summarise is an app to summarise text.</p>
-      <Button>Click me</Button>
+      <Button variant="outline" size={"sm"}>
+        Click me
+      </Button>
     </div>
   );
 }
