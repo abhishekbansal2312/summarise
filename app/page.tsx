@@ -1,13 +1,10 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import HeroSection from "@/components/home/hero-section";
+
 export default function page() {
   return (
-    <div>
-      <h1>Summarise</h1>
-      <p>Summarise is an app to summarise text.</p>
-      <Button variant="outline" size={"sm"}>
-        Click me
-      </Button>
+    <div className="relative w-full">
+      <HeroSection />
     </div>
   );
 }
