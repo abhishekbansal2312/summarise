@@ -103,7 +103,7 @@ const PricingCard = ({
 
 export default function PricingSection() {
   return (
-    <section>
+    <section id="pricing" className="">
       <div
         className="
       py-12
