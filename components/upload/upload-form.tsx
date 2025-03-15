@@ -28,13 +28,13 @@ export default function UploadForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { startUpload } = useUploadThing("pdfUploader", {
-    onClientUploadComplete: () => {
+    onClientUploadComplete: (res) => {
+      console.log("✅ Upload completed:", res);
       toast.success("✅ File uploaded successfully!");
-      console.log("Uploaded successfully!");
     },
-    onUploadError: () => {
+    onUploadError: (error) => {
+      console.error("❌ Upload error:", error);
       toast.error("❌ Error occurred while uploading.");
-      console.error("Error occurred while uploading");
     },
     onUploadBegin: (files) => {
       console.log("Upload has begun for", files);
@@ -54,6 +54,8 @@ export default function UploadForm() {
       return;
     }
 
+    console.log("File selected:", file);
+
     const validatedFields = schema.safeParse({ file });
 
     if (!validatedFields.success) {
@@ -61,7 +63,7 @@ export default function UploadForm() {
         .map((err) => err.message)
         .join(", ");
       toast.error(`⚠️ ${errorMessage}`);
-      console.error(errorMessage);
+      console.error("Validation error:", errorMessage);
       return;
     }
 
@@ -69,22 +71,30 @@ export default function UploadForm() {
     setIsLoading(true);
 
     try {
+      console.log("Starting upload...", file);
       const resp = await startUpload([file]);
-      toast.dismiss(loadingToastId);
-      setIsLoading(false);
+      console.log("Upload response:", resp);
 
       if (!resp || resp.length === 0 || !resp[0]?.url) {
+        toast.dismiss(loadingToastId);
+        setIsLoading(false);
         toast.error("❌ Upload failed. No file URL returned.");
+        console.error("Upload failed, response:", resp);
         return;
       }
 
       const fileUrl = resp[0].url;
-      console.log(fileUrl, "File uploaded successfully!");
+      console.log("File uploaded successfully! File URL:", fileUrl);
 
+      toast.dismiss(loadingToastId);
+      toast.success("✅ File uploaded successfully!");
+
+      console.log("Calling generatePdfSummary with:", fileUrl);
       const result = await generatePdfSummary(fileUrl);
-      console.log(result, "Summary generated");
+      console.log("Summary generation response:", result);
 
       const { data = null } = result || {};
+      console.log("Extracted summary data:", data);
       if (data) {
         toast.success("🎉 Summary generated successfully!");
       }
@@ -97,19 +107,25 @@ export default function UploadForm() {
           title: data.title,
           fileName: file.name,
         };
+        console.log("Storing summary with data:", storedData);
         storeResult = await storePdfSummaryAction(storedData);
+        console.log("Store response:", storeResult);
       }
 
       if (storeResult?.data?.id) {
         toast.success("🎉 Summary Saved successfully!");
         formRef.current?.reset();
+        console.log(
+          "Redirecting to summary page:",
+          `/summaries/${storeResult.data.id}`
+        );
         router.push(`/summaries/${storeResult.data.id}`);
       } else {
         toast.error("❌ Failed to save summary.");
+        console.error("Save failed, response:", storeResult);
       }
     } catch (error) {
       toast.dismiss(loadingToastId);
-      setIsLoading(false);
       toast.error("❌ Upload failed with an exception.");
       console.error("Upload exception:", error);
     } finally {
