@@ -6,27 +6,7 @@ import { generateSummaryFromGemini } from "@/lib/geminiai";
 import { auth } from "@clerk/nextjs/server";
 import { getDbConnected } from "@/lib/db";
 import { formatFileNameTitle } from "@/utils/format-utils";
-import crypto from "crypto";
 import { revalidatePath } from "next/cache";
-
-// Function to generate a deterministic UUID v5 from a string
-function generateUUIDFromString(input: string): string {
-  // Use a fixed namespace UUID (this is an example namespace)
-  const NAMESPACE = "1b671a64-40d5-491e-99b0-da01ff1f3341";
-
-  // Generate a UUID v5 from the input string
-  const uuid = crypto
-    .createHash("sha1")
-    .update(NAMESPACE)
-    .update(input)
-    .digest("hex");
-
-  // Format as UUID
-  return `${uuid.slice(0, 8)}-${uuid.slice(8, 12)}-${uuid.slice(
-    12,
-    16
-  )}-${uuid.slice(16, 20)}-${uuid.slice(20, 32)}`;
-}
 
 export async function generatePdfSummary(uploadResponse: any) {
   console.log("Raw Upload Response:", uploadResponse);
@@ -34,48 +14,35 @@ export async function generatePdfSummary(uploadResponse: any) {
   let fileUrl;
   let fileName;
 
-  // Case 1: If `uploadResponse` is a **string**, use it directly
   if (typeof uploadResponse === "string") {
     fileUrl = uploadResponse;
-    // Extract filename from URL string
     fileName = fileUrl.split("/").pop() || "unknown-file";
-  }
-  // Case 2: If `uploadResponse` is an **array**, extract `ufsUrl`
-  else if (Array.isArray(uploadResponse) && uploadResponse.length > 0) {
+  } else if (Array.isArray(uploadResponse) && uploadResponse.length > 0) {
     fileUrl = uploadResponse[0]?.ufsUrl || uploadResponse[0]?.appUrl;
     fileName =
       uploadResponse[0]?.fileName || uploadResponse[0]?.name || "unknown-file";
-  }
-  // Case 3: If `uploadResponse` is an **object**, extract `ufsUrl`
-  else if (typeof uploadResponse === "object" && uploadResponse !== null) {
+  } else if (typeof uploadResponse === "object" && uploadResponse !== null) {
     fileUrl = uploadResponse?.ufsUrl || uploadResponse?.appUrl;
     fileName =
       uploadResponse?.fileName || uploadResponse?.name || "unknown-file";
   }
 
-  // Handle invalid file URL cases
   if (!fileUrl || typeof fileUrl !== "string") {
     console.error("Invalid file URL format:", fileUrl);
-    return {
-      success: false,
-      message: "Invalid file URL format",
-      data: null,
-    };
+    return { success: false, message: "Invalid file URL format", data: null };
   }
 
   try {
-    // Extract text from the PDF
+    console.log("Fetching text from:", fileUrl);
     const pdfText = await fetchAndExtractPdfText(fileUrl);
     console.log("Extracted PDF Text:", pdfText);
 
     let summary;
-
     try {
       summary = await generateSummaryFromOpenAI(pdfText);
       console.log("OpenAI Summary:", summary);
     } catch (error) {
       console.error("OpenAI Error:", error);
-
       if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
         try {
           summary = await generateSummaryFromGemini(pdfText);
@@ -133,20 +100,11 @@ async function savedPdfSummary({
   try {
     const sql = await getDbConnected();
 
-    // Generate a UUID from the Clerk user ID
-    const userUUID = userId ? generateUUIDFromString(userId) : null;
-
-    // Make sure the UUID is valid
-    if (
-      !userUUID ||
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        userUUID
-      )
-    ) {
-      throw new Error("Cannot generate valid UUID from user ID");
+    if (!userId) {
+      throw new Error("User ID is required.");
     }
 
-    console.log("Generated UUID:", userUUID);
+    console.log("Saving PDF summary for User ID:", userId);
 
     const result = await sql`
       INSERT INTO pdf_summaries (
@@ -156,7 +114,7 @@ async function savedPdfSummary({
         title,
         file_name
       ) VALUES (
-        ${userUUID}::uuid,
+        ${userId},  -- No UUID enforcement
         ${fileUrl},
         ${summary},
         ${title},
@@ -179,13 +137,10 @@ export async function storePdfSummaryAction({
 }: Omit<PdfSummaryType, "userId">) {
   try {
     const { userId } = await auth();
-    console.log(userId, "User ID");
+    console.log("Authenticated User ID:", userId);
 
     if (!userId) {
-      return {
-        success: false,
-        message: "User not authenticated",
-      };
+      return { success: false, message: "User not authenticated" };
     }
 
     const savedSummary = await savedPdfSummary({
@@ -197,10 +152,7 @@ export async function storePdfSummaryAction({
     });
 
     if (!savedSummary) {
-      return {
-        success: false,
-        message: "Failed to save PDF summary",
-      };
+      return { success: false, message: "Failed to save PDF summary" };
     }
 
     revalidatePath(`/summaries/${savedSummary.id}`);
@@ -208,9 +160,7 @@ export async function storePdfSummaryAction({
     return {
       success: true,
       message: "PDF summary saved successfully",
-      data: {
-        id: savedSummary.id,
-      },
+      data: { id: savedSummary.id },
     };
   } catch (error) {
     console.error("Error in storePdfSummaryAction:", error);
