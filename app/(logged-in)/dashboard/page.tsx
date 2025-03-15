@@ -7,6 +7,7 @@ import { getSummaries } from "@/lib/summaries";
 
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import EmptySummaryState from "@/components/summaries/empty-summary";
 
 export default async function DashboardPage() {
   let uploadLimit = 5;
@@ -64,12 +65,16 @@ export default async function DashboardPage() {
             </Link>
           </div>
         </div>
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 sm:px-0">
-          {summaries.map((summary, index) => (
-            <SummaryCard key={index} summary={summary} />
-          ))}
-        </div>
+
+        {summaries.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 sm:px-0">
+            {summaries.map((summary, index) => (
+              <SummaryCard key={index} summary={summary} />
+            ))}
+          </div>
+        ) : (
+          <EmptySummaryState />
+        )}
       </div>
     </main>
   );
