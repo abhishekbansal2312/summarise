@@ -7,6 +7,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getDbConnected } from "@/lib/db";
 import { formatFileNameTitle } from "@/utils/format-utils";
 import { revalidatePath } from "next/cache";
+import { extractTitleFromSummary } from "@/utils/title-utils";
 
 export async function generatePdfSummary(uploadResponse: any) {
   console.log("Raw Upload Response:", uploadResponse);
@@ -64,12 +65,22 @@ export async function generatePdfSummary(uploadResponse: any) {
       };
     }
 
-    const formattedFileName = formatFileNameTitle(fileName);
+    // First try to extract title from the summary
+    let title = extractTitleFromSummary(summary);
+
+    // If no title was extracted, use the formatted filename
+    if (!title) {
+      title = formatFileNameTitle(fileName);
+    }
 
     return {
       success: true,
       message: "Summary generated successfully",
-      data: { summary, title: formattedFileName, fileName },
+      data: {
+        summary,
+        title,
+        fileName,
+      },
     };
   } catch (error) {
     console.error("Error generating PDF summary:", error);
@@ -81,7 +92,6 @@ export async function generatePdfSummary(uploadResponse: any) {
     };
   }
 }
-
 interface PdfSummaryType {
   userId?: string;
   fileUrl: string;
