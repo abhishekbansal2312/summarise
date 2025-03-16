@@ -29,7 +29,10 @@ const steps: Step[] = [
 
 export default function HowItWorksSection() {
   return (
-    <section className="relative overflow-hidden bg-gray-50 py-6 sm:py-12 lg:py-24">
+    <section
+      id="how-it-works"
+      className="relative overflow-hidden bg-gray-50 py-6 sm:py-12 lg:py-24"
+    >
       {/* Gradient Line */}
       <div className="relative bottom-10   flex justify-center">
         <div className="h-1 hidden sm:block bg-gradient-to-r from-rose-500 to-cyan-500 w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%]"></div>
