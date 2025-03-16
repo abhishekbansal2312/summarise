@@ -71,3 +71,17 @@ export function SummaryHeader({
     </div>
   );
 }
+
+export function parsePoint(point: string) {
+  const isNumbered = /^\d+\./.test(point);
+  const isMainPoint = /^[A-Z]/.test(point);
+  const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]/u;
+  const emojiMatch = point.match(emojiRegex);
+  const hasEmoji = !!emojiMatch;
+  const emoji = hasEmoji ? emojiMatch[0] : null;
+
+  let cleanPoint = point.replace(emojiRegex, "").trim();
+  if (isNumbered) cleanPoint = cleanPoint.replace(/^\d+\.\s*/, "");
+
+  return { isNumbered, isMainPoint, hasEmoji, emoji, cleanPoint };
+}
