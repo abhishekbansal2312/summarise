@@ -1,9 +1,9 @@
-"use client";
 import React from "react";
 import { FileText } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import NavLink from "./nav-link";
 import { SignedIn, SignedOut, UserButton, useAuth } from "@clerk/nextjs";
+import PlanBadge from "./plan-badge";
 
 export default function Header() {
   return (
@@ -31,7 +31,7 @@ export default function Header() {
         <SignedIn>
           <div className="flex lg:gap-4 gap-2 items-center">
             <NavLink href={"/upload"}>Upload a PDF</NavLink>
-            <div>Pro</div>
+            <PlanBadge />
             <UserButton />
           </div>
         </SignedIn>
