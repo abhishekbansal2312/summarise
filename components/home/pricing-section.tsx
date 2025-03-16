@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ArrowRight, CheckIcon } from "lucide-react";
-
+import { plans } from "@/utils/constants";
 type PriceType = {
   id: string;
   name: string;
@@ -12,35 +12,6 @@ type PriceType = {
   paymentLink: string;
   priceId: string;
 };
-const plans = [
-  {
-    id: "basic",
-    name: "Basic",
-    paymentLink: "",
-    priceId: "",
-    price: 9,
-    description: "For casual readers",
-    items: [
-      "5 PDF summaries per month",
-      "Standard Processing Speed",
-      "Email support",
-    ],
-  },
-  {
-    id: "pro",
-    paymentLink: "",
-    priceId: "",
-    name: "Pro",
-    price: 19,
-    description: "For professionals and teams",
-    items: [
-      "Unlimited PDF summaries",
-      "Priority Processing",
-      "24/7 priority support",
-      "Markdown export",
-    ],
-  },
-];
 
 const PricingCard = ({
   name,
