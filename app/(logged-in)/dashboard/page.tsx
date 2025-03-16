@@ -16,7 +16,19 @@ export default async function DashboardPage() {
   if (!userId) {
     return redirect("/sign-in");
   }
-  const { hasReachedLimit, uploadLimit } = await hasReachedUploadLimit(userId);
+
+  const uploadLimitData = await hasReachedUploadLimit(userId);
+
+  let hasReachedLimit = true;
+  let uploadLimit = 0;
+
+  if (uploadLimitData) {
+    hasReachedLimit = uploadLimitData.hasReachedLimit;
+    uploadLimit = uploadLimitData.uploadLimit;
+  } else {
+    console.error("Failed to retrieve upload limit data.");
+  }
+
   const summaries = await getSummaries(userId);
 
   return (
@@ -59,27 +71,32 @@ export default async function DashboardPage() {
             </Link>
           )}
         </div>
-        <div className="mb-6">
-          <div className="border border-rose-300 bg-rose-100 text-rose-700 text-sm p-4 rounded-lg flex items-center justify-between">
-            <p className="flex-1">
-              <strong>
-                You've reached the limit of {uploadLimit} summaries on this
-                plan.
-              </strong>{" "}
-              Upgrade to unlock more!
-            </p>
 
-            {/* Upgrade Link */}
-            <Link
-              href="#pricing"
-              className="flex items-center gap-2 text-rose-700 font-semibold hover:text-rose-800 underline transition-all duration-300"
-            >
-              Click here to upgrade to Pro
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+        {/* Alert for upload limit */}
+        {hasReachedLimit && (
+          <div className="mb-6">
+            <div className="border border-rose-300 bg-rose-100 text-rose-700 text-sm p-4 rounded-lg flex items-center justify-between">
+              <p className="flex-1">
+                <strong>
+                  You've reached the limit of {uploadLimit} summaries on this
+                  plan.
+                </strong>{" "}
+                Upgrade to unlock more!
+              </p>
+
+              {/* Upgrade Link */}
+              <Link
+                href="#pricing"
+                className="flex items-center gap-2 text-rose-700 font-semibold hover:text-rose-800 underline transition-all duration-300"
+              >
+                Click here to upgrade to Pro
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
 
+        {/* Display Summaries */}
         {summaries.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 sm:px-0">
             {summaries.map((summary, index) => (
