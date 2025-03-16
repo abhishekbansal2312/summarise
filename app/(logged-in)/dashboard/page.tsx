@@ -8,15 +8,15 @@ import { getSummaries } from "@/lib/summaries";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import EmptySummaryState from "@/components/summaries/empty-summary";
+import { hasReachedUploadLimit } from "@/lib/user";
 
 export default async function DashboardPage() {
-  let uploadLimit = 5;
   const user = await currentUser();
   const userId = user?.id;
   if (!userId) {
     return redirect("/sign-in");
   }
-
+  const { hasReachedLimit, uploadLimit } = await hasReachedUploadLimit(userId);
   const summaries = await getSummaries(userId);
 
   return (
@@ -34,23 +34,37 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <Link href="/upload">
+          {hasReachedLimit ? (
             <Button
               variant="link"
               className="bg-gradient-to-r from-rose-500 to-rose-700 hover:from-rose-600 
-              hover:to-rose-800 hover:scale-105 transition-all duration-300 group hover:no-underline 
-              flex items-center text-white"
+              hover:to-rose-800 transition-all duration-300 group hover:no-underline 
+              flex items-center text-white opacity-50 cursor-not-allowed"
+              disabled={true}
             >
               <Plus className="w-5 h-5 mr-2" />
               New Summary
             </Button>
-          </Link>
+          ) : (
+            <Link href="/upload">
+              <Button
+                variant="link"
+                className="bg-gradient-to-r from-rose-500 to-rose-700 hover:from-rose-600 
+                hover:to-rose-800 hover:scale-105 transition-all duration-300 group hover:no-underline 
+                flex items-center text-white"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                New Summary
+              </Button>
+            </Link>
+          )}
         </div>
         <div className="mb-6">
           <div className="border border-rose-300 bg-rose-100 text-rose-700 text-sm p-4 rounded-lg flex items-center justify-between">
             <p className="flex-1">
               <strong>
-                You've reached the limit of 5 summaries on this plan.
+                You've reached the limit of {uploadLimit} summaries on this
+                plan.
               </strong>{" "}
               Upgrade to unlock more!
             </p>
