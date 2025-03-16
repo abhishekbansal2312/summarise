@@ -1,9 +1,12 @@
 import { Pizza } from "lucide-react";
+import { SummaryViewer } from "../summaries/summary-viewer";
+import { about } from "@/utils/about";
 
 export default function DemoSection() {
   return (
     <section className="relative">
       <div className="max-w-7xl pb-20 mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Background Gradient */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10 transform-gpu overflow-hidden blur-3xl"
@@ -19,26 +22,28 @@ export default function DemoSection() {
           />
         </div>
 
+        {/* Content */}
         <div className="flex flex-col items-center text-center space-y-6">
+          {/* Icon */}
           <div className="inline-flex items-center justify-center p-3 bg-rose-100 rounded-full">
             <Pizza className="w-8 h-8 text-rose-500" />
           </div>
 
+          {/* Heading */}
           <h3 className="font-bold text-3xl md:text-4xl max-w-2xl mx-auto">
             Watch how Summarise transforms your PDFs into an{" "}
-            <span className="text-rose-500 italic">easy to read summary!</span>
+            <span className="text-rose-500 italic">easy-to-read summary!</span>
           </h3>
 
+          {/* Description */}
           <p className="text-gray-600 max-w-xl mx-auto text-lg">
             Our AI-powered tool extracts the key information and presents it in
             a clean, digestible format so you can grasp the content quickly.
           </p>
 
-          <div className="mt-8 p-2 bg-gray-100 rounded-lg shadow-sm border border-gray-200 w-full max-w-3xl">
-            <div className="aspect-video bg-gray-200 rounded flex items-center justify-center">
-              <p className="text-gray-500 font-medium">Crouser Here</p>
-            </div>
-          </div>
+          {/* Summary Viewer */}
+
+          <SummaryViewer summary={about} />
         </div>
       </div>
     </section>
