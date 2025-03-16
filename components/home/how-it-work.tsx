@@ -33,12 +33,10 @@ export default function HowItWorksSection() {
       id="how-it-works"
       className="relative overflow-hidden bg-gray-50 py-6 sm:py-12 lg:py-24"
     >
-      {/* Gradient Line */}
       <div className="relative bottom-10   flex justify-center">
         <div className="h-1 hidden sm:block bg-gradient-to-r from-rose-500 to-cyan-500 w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%]"></div>
       </div>
 
-      {/* Background Shape */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 transform-gpu overflow-hidden blur-3xl"
@@ -54,7 +52,6 @@ export default function HowItWorksSection() {
         />
       </div>
 
-      {/* Section Heading */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
         <h2 className="text-lg sm:text-xl font-bold uppercase mb-2 text-rose-500">
           How It Works
