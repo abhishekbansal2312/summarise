@@ -4,7 +4,7 @@ import { getSummaryById } from "@/lib/summaries";
 import { notFound } from "next/navigation";
 import { SourceInfo } from "@/components/summaries/source-info";
 import { FileText } from "lucide-react";
-import SummaryViewer from "@/components/summaries/summary-viewer";
+import { SummaryViewer } from "@/components/summaries/summary-viewer";
 
 export default async function SummaryPage({
   params,
@@ -49,7 +49,15 @@ export default async function SummaryPage({
               readingTime={readingTime}
             />
           </div>
-          {file_name && <SourceInfo file_name={file_name} />}
+          {file_name && (
+            <SourceInfo
+              fileName={file_name}
+              originalFileUrl={original_file_url}
+              title={title}
+              summaryText={summary_text}
+              createdAt={created_at}
+            />
+          )}
           <div className="relative mt-4 sm:mt-8 lg:mt-16">
             <div
               className="relative p-4 sm:p-6 lg:p-8
