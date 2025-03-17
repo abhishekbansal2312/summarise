@@ -6,9 +6,11 @@ import { toast } from "sonner";
 import { useUploadThing } from "../../utils/uploadthing";
 import {
   generatePdfSummary,
+  generatePdfText,
   storePdfSummaryAction,
 } from "@/actions/upload-actions";
 import { useRouter } from "next/navigation";
+import { formatFileNameTitle } from "@/utils/format-utils";
 
 const schema = z.object({
   file: z
@@ -76,11 +78,7 @@ export default function UploadForm() {
       console.log("Upload response:", resp);
 
       if (!resp || resp.length === 0 || !resp[0]?.url) {
-        toast.dismiss(loadingToastId);
-        setIsLoading(false);
-        toast.error("❌ Upload failed. No file URL returned.");
-        console.error("Upload failed, response:", resp);
-        return;
+        throw new Error("Upload failed. No file URL returned.");
       }
 
       const fileUrl = resp[0].url;
@@ -90,44 +88,47 @@ export default function UploadForm() {
       toast.success("✅ File uploaded successfully!");
 
       console.log("Calling generatePdfSummary with:", fileUrl);
-      const result = await generatePdfSummary(fileUrl);
-      console.log("Summary generation response:", result);
+      const summaryResult = await generatePdfSummary(fileUrl);
+      console.log("Summary generation response:", summaryResult);
 
-      const { data = null } = result || {};
-      console.log("Extracted summary data:", data);
-      if (data) {
-        toast.success("🎉 Summary generated successfully!");
+      if (!summaryResult?.data?.summary) {
+        throw new Error("Summary generation failed.");
       }
 
-      let storeResult;
-      if (data?.summary) {
-        const storedData = {
-          summary: data.summary,
-          fileUrl: resp[0]?.serverData?.file?.url ?? fileUrl,
-          title: data.title,
-          fileName: file.name,
-        };
-        console.log("Storing summary with data:", storedData);
-        storeResult = await storePdfSummaryAction(storedData);
-        console.log("Store response:", storeResult);
+      toast.success("🎉 Summary generated successfully!");
+
+      const formattedFileName = formatFileNameTitle(file.name);
+      const pdfTextResult = await generatePdfText({
+        fileUrl,
+      });
+
+      console.log("Generated PDF text:", pdfTextResult);
+
+      const storedData = {
+        summary: summaryResult.data.summary,
+        fileUrl,
+        title: summaryResult.data.title,
+        fileName: formattedFileName,
+      };
+
+      console.log("Storing summary with data:", storedData);
+      const storeResult = await storePdfSummaryAction(storedData);
+
+      if (!storeResult?.data?.id) {
+        throw new Error("Failed to save summary.");
       }
 
-      if (storeResult?.data?.id) {
-        toast.success("🎉 Summary Saved successfully!");
-        formRef.current?.reset();
-        console.log(
-          "Redirecting to summary page:",
-          `/summaries/${storeResult.data.id}`
-        );
-        router.push(`/summaries/${storeResult.data.id}`);
-      } else {
-        toast.error("❌ Failed to save summary.");
-        console.error("Save failed, response:", storeResult);
-      }
+      toast.success("🎉 Summary saved successfully!");
+      formRef.current?.reset();
+      console.log(
+        "Redirecting to summary page:",
+        `/summaries/${storeResult.data.id}`
+      );
+      router.push(`/summaries/${storeResult.data.id}`);
     } catch (error) {
       toast.dismiss(loadingToastId);
-      toast.error("❌ Upload failed with an exception.");
-      console.error("Upload exception:", error);
+      toast.error(`❌ ${"An unexpected error occurred."}`);
+      console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }

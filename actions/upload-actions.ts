@@ -10,30 +10,31 @@ import { revalidatePath } from "next/cache";
 import { extractTitleFromSummary } from "@/utils/title-utils";
 
 export async function generatePdfSummary(uploadResponse: any) {
-  console.log("Raw Upload Response:", uploadResponse);
-
-  let fileUrl;
-  let fileName;
-
-  if (typeof uploadResponse === "string") {
-    fileUrl = uploadResponse;
-    fileName = fileUrl.split("/").pop() || "unknown-file";
-  } else if (Array.isArray(uploadResponse) && uploadResponse.length > 0) {
-    fileUrl = uploadResponse[0]?.ufsUrl || uploadResponse[0]?.appUrl;
-    fileName =
-      uploadResponse[0]?.fileName || uploadResponse[0]?.name || "unknown-file";
-  } else if (typeof uploadResponse === "object" && uploadResponse !== null) {
-    fileUrl = uploadResponse?.ufsUrl || uploadResponse?.appUrl;
-    fileName =
-      uploadResponse?.fileName || uploadResponse?.name || "unknown-file";
-  }
-
-  if (!fileUrl || typeof fileUrl !== "string") {
-    console.error("Invalid file URL format:", fileUrl);
-    return { success: false, message: "Invalid file URL format", data: null };
-  }
-
   try {
+    console.log("Raw Upload Response:", uploadResponse);
+
+    let fileUrl, fileName;
+
+    if (typeof uploadResponse === "string") {
+      fileUrl = uploadResponse;
+      fileName = fileUrl.split("/").pop() || "unknown-file";
+    } else if (Array.isArray(uploadResponse) && uploadResponse.length > 0) {
+      fileUrl = uploadResponse[0]?.ufsUrl || uploadResponse[0]?.appUrl;
+      fileName =
+        uploadResponse[0]?.fileName ||
+        uploadResponse[0]?.name ||
+        "unknown-file";
+    } else if (uploadResponse && typeof uploadResponse === "object") {
+      fileUrl = uploadResponse.ufsUrl || uploadResponse.appUrl;
+      fileName =
+        uploadResponse.fileName || uploadResponse.name || "unknown-file";
+    }
+    console.log(fileUrl, "hbhbvhjjb");
+
+    if (!fileUrl || typeof fileUrl !== "string") {
+      throw new Error("Invalid file URL format");
+    }
+
     console.log("Fetching text from:", fileUrl);
     const pdfText = await fetchAndExtractPdfText(fileUrl);
     console.log("Extracted PDF Text:", pdfText);
@@ -41,57 +42,33 @@ export async function generatePdfSummary(uploadResponse: any) {
     let summary;
     try {
       summary = await generateSummaryFromOpenAI(pdfText);
-      console.log("OpenAI Summary:", summary);
     } catch (error) {
       console.error("OpenAI Error:", error);
-      if (error instanceof Error && error.message === "RATE_LIMIT_EXCEEDED") {
-        try {
-          summary = await generateSummaryFromGemini(pdfText);
-          console.log("Gemini Summary:", summary);
-        } catch (geminiError) {
-          console.error("Gemini API call failed:", geminiError);
-          throw geminiError;
-        }
-      } else {
-        throw error;
-      }
+      summary = await generateSummaryFromGemini(pdfText);
     }
 
     if (!summary) {
-      return {
-        success: false,
-        message: "Failed to generate summary from both OpenAI and Gemini",
-        data: null,
-      };
+      throw new Error("Failed to generate summary from both OpenAI and Gemini");
     }
 
-    // First try to extract title from the summary
-    let title = extractTitleFromSummary(summary);
-
-    // If no title was extracted, use the formatted filename
-    if (!title) {
-      title = formatFileNameTitle(fileName);
-    }
+    let title =
+      extractTitleFromSummary(summary) || formatFileNameTitle(fileName);
 
     return {
       success: true,
       message: "Summary generated successfully",
-      data: {
-        summary,
-        title,
-        fileName,
-      },
+      data: { summary, title, fileName },
     };
   } catch (error) {
     console.error("Error generating PDF summary:", error);
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Error generating summary",
+      message: " Failed  to generate summary",
       data: null,
     };
   }
 }
+
 interface PdfSummaryType {
   userId?: string;
   fileUrl: string;
@@ -100,7 +77,7 @@ interface PdfSummaryType {
   fileName: string;
 }
 
-async function savedPdfSummary({
+async function savePdfSummary({
   userId,
   fileUrl,
   summary,
@@ -108,31 +85,21 @@ async function savedPdfSummary({
   fileName,
 }: PdfSummaryType) {
   try {
+    if (!userId) throw new Error("User ID is required.");
+
     const sql = await getDbConnected();
-
-    if (!userId) {
-      throw new Error("User ID is required.");
-    }
-
+    if (!sql) throw new Error("Database connection failed.");
     console.log("Saving PDF summary for User ID:", userId);
 
     const result = await sql`
       INSERT INTO pdf_summaries (
-        user_id,
-        original_file_url,
-        summary_text,
-        title,
-        file_name
+        user_id, original_file_url, summary_text, title, file_name
       ) VALUES (
-        ${userId},  -- No UUID enforcement
-        ${fileUrl},
-        ${summary},
-        ${title},
-        ${fileName}
+        ${userId}, ${fileUrl}, ${summary}, ${title}, ${fileName}
       ) RETURNING id;
     `;
 
-    return result && result.length > 0 ? result[0] : null;
+    return result?.length > 0 ? result[0] : null;
   } catch (error) {
     console.error("Error saving PDF summary:", error);
     throw error;
@@ -146,23 +113,26 @@ export async function storePdfSummaryAction({
   fileName,
 }: Omit<PdfSummaryType, "userId">) {
   try {
-    const { userId } = await auth();
+    const authData = await auth();
+    if (!authData?.userId) {
+      throw new Error("User not authenticated");
+    }
+    const { userId } = authData;
     console.log("Authenticated User ID:", userId);
 
     if (!userId) {
-      return { success: false, message: "User not authenticated" };
+      throw new Error("User not authenticated");
     }
 
-    const savedSummary = await savedPdfSummary({
+    const savedSummary = await savePdfSummary({
       userId,
       fileUrl,
       summary,
       title,
       fileName,
     });
-
     if (!savedSummary) {
-      return { success: false, message: "Failed to save PDF summary" };
+      throw new Error("Failed to save PDF summary");
     }
 
     revalidatePath(`/summaries/${savedSummary.id}`);
@@ -174,9 +144,30 @@ export async function storePdfSummaryAction({
     };
   } catch (error) {
     console.error("Error in storePdfSummaryAction:", error);
+    return { success: false, message: " Failed to save PDF summary" };
+  }
+}
+
+export async function generatePdfText({ fileUrl }: { fileUrl: string }) {
+  try {
+    if (!fileUrl || typeof fileUrl !== "string") {
+      throw new Error("Invalid file URL.");
+    }
+
+    const pdfText = await fetchAndExtractPdfText(fileUrl);
+    console.log("Extracted PDF text:", pdfText);
+
+    if (!pdfText) {
+      throw new Error("Failed to extract PDF text");
+    }
+
     return {
-      success: false,
-      message: error instanceof Error ? error.message : "Error storing summary",
+      success: true,
+      message: "PDF text extracted successfully",
+      data: { pdfText },
     };
+  } catch (error) {
+    console.error("Error generating PDF text:", error);
+    return { success: false, message: "Error generating PDF text", data: null };
   }
 }
