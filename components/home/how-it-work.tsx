@@ -1,4 +1,6 @@
+"use client";
 import { BrainCircuitIcon, DownloadIcon, FileText } from "lucide-react";
+import { motion } from "framer-motion";
 
 type Step = {
   label: string;
@@ -33,7 +35,7 @@ export default function HowItWorksSection() {
       id="how-it-works"
       className="relative overflow-hidden bg-gray-50 py-6 sm:py-12 lg:py-24"
     >
-      <div className="relative bottom-10   flex justify-center">
+      <div className="relative bottom-10 flex justify-center">
         <div className="h-1 hidden sm:block bg-gradient-to-r from-rose-500 to-cyan-500 w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%]"></div>
       </div>
 
@@ -66,8 +68,18 @@ export default function HowItWorksSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {steps.map((step, index) => (
-            <div
+            <motion.div
               key={step.label}
+              initial={{ opacity: 0, x: -100 }} // Start off-screen from the left
+              whileInView={{ opacity: 1, x: 0 }} // Animate to the default position when in view
+              viewport={{ once: true }} // Trigger animation only once when it enters the viewport
+              transition={{
+                type: "spring",
+                stiffness: 100, // Lower stiffness for a smoother motion
+                damping: 50, // Lower damping for a slower and smoother stop
+                delay: index * 0.2, // Stagger the animation for each step
+                duration: 1.5, // Increase the duration to make the animation slower
+              }}
               className="flex flex-col items-center text-center space-y-4 p-6 bg-white shadow-md rounded-lg transition duration-300 hover:shadow-xl hover:-translate-y-2"
             >
               <div className="flex items-center justify-center p-3 bg-rose-100 rounded-full">
@@ -79,7 +91,7 @@ export default function HowItWorksSection() {
               <p className="text-gray-600 text-sm sm:text-base">
                 {step.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

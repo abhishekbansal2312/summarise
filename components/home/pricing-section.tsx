@@ -1,8 +1,11 @@
+"use client";
 import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ArrowRight, CheckIcon } from "lucide-react";
 import { plans } from "@/utils/constants";
+import { motion } from "framer-motion";
+
 type PriceType = {
   id: string;
   name: string;
@@ -23,10 +26,19 @@ const PricingCard = ({
   priceId,
 }: PriceType) => {
   return (
-    <div
-      className="relative w-full max-w-lg hover:scale-105
-        transition-all duration-300 ease-in-out
-        "
+    <motion.div
+      className="relative w-full max-w-lg hover:scale-105 transition-all duration-300 ease-in-out"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{
+        duration: 0.5,
+        delay: 0.5,
+
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      }}
     >
       <div
         className={cn(
@@ -38,8 +50,8 @@ const PricingCard = ({
           <p className="text-lg lg:text-xl capitalize font-bold">{name}</p>
           <p className="text-base-content/80 mt-2">{description}</p>
         </div>
-        <div className="flex  gap-2">
-          <p className="text-5xl tracking-tight   font-extrabold">{price}</p>
+        <div className="flex gap-2">
+          <p className="text-5xl tracking-tight font-extrabold">{price}</p>
           <div className="flex flex-col justify-end mb-[4px]">
             <p className="text-xs uppercase font-semibold">USD</p>
             <p className="text-xs text-gray-500">/month</p>
@@ -54,7 +66,7 @@ const PricingCard = ({
           ))}
         </div>
 
-        <div className=" space-y-2 flex justify-center w-full ">
+        <div className="space-y-2 flex justify-center w-full">
           <Link
             href={paymentLink}
             className={cn(
@@ -68,7 +80,7 @@ const PricingCard = ({
           </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -89,11 +101,11 @@ export default function PricingSection() {
       "
       >
         <div className="flex flex-col items-center justify-center w-full pb-12">
-          <h2 className="uppercase font-bold text-xl  text-rose-500 mb-2">
+          <h2 className="uppercase font-bold text-xl text-rose-500 mb-2">
             Pricing
           </h2>
           <p
-            className=" 
+            className="
             text-3xl
             lg-text-3xl
             font-bold
@@ -102,18 +114,24 @@ export default function PricingSection() {
             text-center
             lg:mb-12
             text-gray-900
-         
-        
           "
           >
             Choose a plan that works for you
           </p>
         </div>
-        <div className="flex relative flex-col justify-center lg:flex-row items-center lg:items-stretch gap-8">
-          {plans.map((plan) => (
+
+        {/* Pricing Cards Animation */}
+        <motion.div
+          className="flex relative flex-col justify-center lg:flex-row items-center lg:items-stretch gap-8"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          {plans.map((plan, index) => (
             <PricingCard key={plan.id} {...plan} />
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
