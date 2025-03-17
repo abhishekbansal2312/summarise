@@ -7,6 +7,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { SummaryViewer } from "@/components/summaries/summary-viewer";
 import { aboutUpload } from "@/utils/about";
+
+export const maxDuration = 60;
 export default async function Page() {
   const user = await currentUser();
   const userId = user?.id;
