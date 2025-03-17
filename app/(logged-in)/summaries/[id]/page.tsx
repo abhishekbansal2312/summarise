@@ -5,24 +5,20 @@ import { notFound } from "next/navigation";
 import { SourceInfo } from "@/components/summaries/source-info";
 import { FileText } from "lucide-react";
 import { SummaryViewer } from "@/components/summaries/summary-viewer";
-
 export default async function SummaryPage({
-  params,
+  params: { id },
 }: {
   params: { id: string };
 }) {
-  if (!params) {
+  if (!id) {
     notFound();
   }
-
-  const id = params.id;
 
   const summary = await getSummaryById(id);
 
   if (!summary) {
     notFound();
   }
-
   const {
     user_id,
     title,
@@ -38,7 +34,7 @@ export default async function SummaryPage({
   const readingTime = Math.ceil((word_count || 0) / 200);
 
   return (
-    <div className="relative isolate min-h-screen bg-gradient-to-b from-rose-50/40 to-white">
+    <div className="relative min-h-screen items-center ">
       <BgGradient className="from-rose-400 via-rose-300 to-orange-200" />
       <div className="container mx-auto flex flex-col gap-4">
         <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-12 lg:py-24">
