@@ -38,8 +38,8 @@ export default function UploadForm() {
       console.error("❌ Upload error:", error);
       toast.error("❌ Error occurred while uploading.");
     },
-    onUploadBegin: (files) => {
-      console.log("Upload has begun for", files);
+    onUploadBegin: (data) => {
+      console.log("Upload has begun for", data);
     },
   });
 
@@ -74,14 +74,18 @@ export default function UploadForm() {
 
     try {
       console.log("Starting upload...", file);
-      const resp = await startUpload([file]);
-      console.log("Upload response:", resp);
+      const uploadResponse = await startUpload([file]);
+      console.log("Upload response:", uploadResponse);
 
-      if (!resp || resp.length === 0 || !resp[0]?.url) {
+      if (
+        !uploadResponse ||
+        uploadResponse.length === 0 ||
+        !uploadResponse[0]?.url
+      ) {
         throw new Error("Upload failed. No file URL returned.");
       }
 
-      const fileUrl = resp[0].url;
+      const fileUrl = uploadResponse[0].url;
       console.log("File uploaded successfully! File URL:", fileUrl);
 
       toast.dismiss(loadingToastId);
@@ -106,7 +110,7 @@ export default function UploadForm() {
 
       const storedData = {
         summary: summaryResult.data.summary,
-        fileUrl,
+        fileUrl: uploadResponse[0].serverData.fileUrl,
         title: summaryResult.data.title,
         fileName: formattedFileName,
       };
