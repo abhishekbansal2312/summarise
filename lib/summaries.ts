@@ -1,4 +1,3 @@
-import React from "react";
 import { getDbConnected } from "./db";
 
 export async function getSummaries(userId: string) {
