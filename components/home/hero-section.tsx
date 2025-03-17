@@ -18,8 +18,7 @@ const buttonVariants = {
 };
 
 export default function HeroSection() {
-  const { MotionSection, MotionDiv, MotionP, MotionSpan, MotionH1, MotionH2 } =
-    MotionComponents;
+  const { MotionSection, MotionDiv, MotionH1, MotionH2 } = MotionComponents;
 
   return (
     <MotionSection
