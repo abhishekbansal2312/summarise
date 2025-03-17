@@ -13,7 +13,17 @@ export default async function Page() {
     redirect("/sign-in");
   }
 
-  const { hasReachedLimit, uploadLimit } = await hasReachedUploadLimit(userId);
+  const uploadLimitData = await hasReachedUploadLimit(userId);
+
+  let hasReachedLimit = true;
+  let uploadLimit = 0;
+
+  if (uploadLimitData) {
+    hasReachedLimit = uploadLimitData.hasReachedLimit;
+    uploadLimit = uploadLimitData.uploadLimit;
+  } else {
+    console.error("Failed to retrieve upload limit data.");
+  }
 
   if (hasReachedLimit) {
     redirect("/dashboard");
