@@ -63,7 +63,7 @@ async function DashboardContent() {
           <strong>You've reached the limit of {uploadLimit} summaries.</strong>{" "}
           Upgrade to unlock more!
           <Link
-            href="#pricing"
+            href="/#pricing"
             className="ml-2 text-rose-700 font-semibold hover:underline"
           >
             Upgrade to Pro <ArrowRight className="w-4 h-4 inline" />
