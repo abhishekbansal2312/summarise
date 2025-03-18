@@ -3,8 +3,12 @@ export const plans = [
   {
     id: "basic",
     name: "Basic",
-    paymentLink: isDev ? "https://buy.stripe.com/test_eVa0299Jeade5ricMM" : "",
-    priceId: isDev ? "price_1R3HKvE2Fvocy8KEJr9qKMqn" : "",
+    paymentLink: isDev
+      ? "https://buy.stripe.com/test_eVa0299Jeade5ricMM"
+      : "https://buy.stripe.com/test_eVa0299Jeade5ricMM",
+    priceId: isDev
+      ? "price_1R3HKvE2Fvocy8KEJr9qKMqn"
+      : "price_1R3HKvE2Fvocy8KEJr9qKMqn",
     price: 9,
     description: "For casual readers",
     items: [
@@ -15,8 +19,12 @@ export const plans = [
   },
   {
     id: "pro",
-    paymentLink: isDev ? "https://buy.stripe.com/test_8wM2ahdZubhibPGfYZ" : "",
-    priceId: isDev ? "price_1R3HPaE2Fvocy8KEMhySVPO5" : "",
+    paymentLink: isDev
+      ? "https://buy.stripe.com/test_8wM2ahdZubhibPGfYZ"
+      : "https://buy.stripe.com/test_8wM2ahdZubhibPGfYZ",
+    priceId: isDev
+      ? "price_1R3HPaE2Fvocy8KEMhySVPO5"
+      : "price_1R3HPaE2Fvocy8KEMhySVPO5",
     name: "Pro",
     price: 19,
     description: "For professionals and teams",
