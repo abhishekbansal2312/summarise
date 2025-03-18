@@ -77,7 +77,7 @@ The application uses a relational database with three primary tables:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/summarise.git
+git clone https://github.com/abhishekbansal2312/summarise
 cd summarise
 ```
 
