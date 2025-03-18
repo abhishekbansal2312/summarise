@@ -41,7 +41,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#how-it-works"
+                  href="/#how-it-works"
                   className="text-gray-700 hover:text-rose-600 transition-colors"
                 >
                   How It Works
@@ -49,7 +49,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#pricing"
+                  href="/#pricing"
                   className="text-gray-700 hover:text-rose-600 transition-colors"
                 >
                   Pricing
@@ -72,7 +72,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="#pricing"
+                  href="/#pricing"
                   className="text-gray-700 hover:text-rose-600 transition-colors"
                 >
                   Basic - $9/month
@@ -80,7 +80,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#pricing"
+                  href="/#pricing"
                   className="text-gray-700 hover:text-rose-600 transition-colors"
                 >
                   Pro - $19/month
@@ -88,7 +88,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#pricing"
+                  href="/#pricing"
                   className="text-gray-700 hover:text-rose-600 transition-colors"
                 >
                   Features Comparison
