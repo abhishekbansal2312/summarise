@@ -54,6 +54,10 @@ Summarise is an AI-powered SaaS application built with Next.js that generates co
 /public          # Static assets
 ```
 
+### 🏗️ App Architecture
+
+https://www.tldraw.com/f/l4mRdQJ95KdSWNwviKz1Q?d=v2794.-1993.9465.6134.imdstZ4UsILqJFHcwslMs
+
 ### Database Schema
 
 The application uses a relational database with three primary tables:
