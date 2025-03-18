@@ -1,8 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkle, ArrowRight } from "lucide-react";
+import { Sparkle, ArrowRight, Upload } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 import { containerVariants, itemVariants } from "@/utils/constants";
 import MotionComponents from "../common/motion-wrapper";
@@ -19,6 +21,16 @@ const buttonVariants = {
 
 export default function HeroSection() {
   const { MotionSection, MotionDiv, MotionH1, MotionH2 } = MotionComponents;
+  const router = useRouter();
+  const { userId, isSignedIn } = useAuth();
+
+  const handleGetStarted = () => {
+    if (isSignedIn) {
+      router.push("/upload");
+    } else {
+      router.push("/sign-up");
+    }
+  };
 
   return (
     <MotionSection
@@ -66,19 +78,33 @@ export default function HeroSection() {
         Get a beautiful summary reel of the document in seconds.
       </MotionH2>
 
-      <MotionDiv variants={itemVariants} whileHover={buttonVariants}>
-        <Button className="mt-12 px-8 py-5 text-white text-lg sm:text-xl rounded-full bg-gradient-to-r from-slate-900 to-rose-500 hover:from-rose-500 hover:to-slate-900 font-bold flex gap-2 items-center">
-          <Link
-            href="#pricing"
-            className="flex 
-          items-center
-          text-white
-          gap-2 hover:text-rose-100"
+      <MotionDiv
+        variants={itemVariants}
+        className="flex flex-col sm:flex-row gap-4 mt-12"
+      >
+        <MotionDiv whileHover={buttonVariants}>
+          <Button
+            onClick={handleGetStarted}
+            className="px-8 py-5 text-white text-lg sm:text-xl rounded-full bg-gradient-to-r from-slate-900 to-rose-500 hover:from-rose-500 hover:to-slate-900 font-bold flex gap-2 items-center"
           >
-            <span>Try Summarise</span>
-            <ArrowRight className="animate-pulse" />
-          </Link>
-        </Button>
+            <span>{isSignedIn ? "Upload PDF" : "Get Started"}</span>
+            {isSignedIn ? (
+              <Upload className="ml-1" />
+            ) : (
+              <ArrowRight className="ml-1 animate-pulse" />
+            )}
+          </Button>
+        </MotionDiv>
+
+        <MotionDiv whileHover={buttonVariants}>
+          <Button
+            variant="outline"
+            className="px-8 py-5 text-lg sm:text-xl rounded-full border-2 border-rose-200 hover:bg-rose-50 hover:border-rose-300 font-medium"
+            onClick={() => router.push("/#pricing")}
+          >
+            View Plans
+          </Button>
+        </MotionDiv>
       </MotionDiv>
     </MotionSection>
   );

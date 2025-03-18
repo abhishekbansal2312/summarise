@@ -1,9 +1,10 @@
+// header.jsx - Make this a server component
 import React from "react";
 import { FileText } from "lucide-react";
-import { Button } from "../../components/ui/button";
 import NavLink from "./nav-link";
-import { SignedIn, SignedOut, UserButton, useAuth } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import PlanBadge from "./plan-badge";
+import ClientSideButtons from "./client-side-buttons";
 
 export default function Header() {
   return (
@@ -30,14 +31,14 @@ export default function Header() {
       <div className="flex lg:justify-end lg:flex-1">
         <SignedIn>
           <div className="flex lg:gap-4 gap-2 items-center">
-            <NavLink href={"/upload"}>Upload a PDF</NavLink>
+            <ClientSideButtons variant="upload" />
             <PlanBadge />
             <UserButton />
           </div>
         </SignedIn>
         <SignedOut>
           <div className="flex lg:gap-4 gap-2 items-center">
-            <NavLink href={"/sign-in"}>Sign-in</NavLink>
+            <ClientSideButtons variant="auth" />
           </div>
         </SignedOut>
       </div>
